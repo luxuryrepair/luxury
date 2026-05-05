@@ -4,7 +4,7 @@ const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : 'opcdigtqxrmksmemnugs.supabase.co'
 
-const rawBasePath = (process.env.NEXT_PUBLIC_BASE_PATH || '').trim()
+const rawBasePath = (process.env.NEXT_PUBLIC_BASE_PATH || '/luxury').trim()
 const normalizedBasePath = rawBasePath
   ? `/${rawBasePath.replace(/^\/+|\/+$/g, '')}`
   : ''
