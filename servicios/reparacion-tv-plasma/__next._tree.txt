@@ -1,2 +1,2 @@
-:HL["/_next/static/chunks/0ut1c6s_6gcr3.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"servicios","param":null,"prefetchHints":0,"slots":{"children":{"name":"slug","param":{"type":"d","key":"reparacion-tv-plasma","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"TkOveu0JOOr9UQd23_IHn"}
+:HL["/luxury/_next/static/chunks/0ut1c6s_6gcr3.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"servicios","param":null,"prefetchHints":0,"slots":{"children":{"name":"slug","param":{"type":"d","key":"reparacion-tv-plasma","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"MWpe291XwjOhy6TjrPQ33"}
