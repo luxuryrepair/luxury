@@ -82,6 +82,8 @@ jobs:
         working-directory: ./frontend
         run: npm run build
         env:
+          # Base path para GitHub Pages (repo project site)
+          NEXT_PUBLIC_BASE_PATH:                  /luxury
           # Supabase — obligatorios (la info del negocio viene de la DB, no de secrets)
           NEXT_PUBLIC_SUPABASE_URL:                  ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY:             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
