@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}{% if review %}Editar{% else %}Nueva{% endif %} Review{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ url_for('reviews.list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="fw-bold mb-0">{% if review %}Editar{% else %}Nueva{% endif %} Review</h2>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" class="needs-validation" novalidate>
+            <!-- Nombre del cliente -->
+            <div class="mb-3">
+                <label for="name" class="form-label">Nombre del Cliente <span class="text-danger">*</span></label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="name" 
+                    name="name" 
+                    value="{{ review.name if review else '' }}" 
+                    required
+                    maxlength="100"
+                >
+                <div class="invalid-feedback">
+                    Por favor ingresa el nombre del cliente.
+                </div>
+            </div>
+
+            <!-- Rating -->
+            <div class="mb-3">
+                <label for="rating" class="form-label">Calificación <span class="text-danger">*</span></label>
+                <div class="rating-input">
+                    {% for i in range(5, 0, -1) %}
+                    <input 
+                        type="radio" 
+                        id="rating{{ i }}" 
+                        name="rating" 
+                        value="{{ i }}"
+                        {% if review and review.rating|int == i %}checked{% elif not review and i == 5 %}checked{% endif %}
+                        required
+                    >
+                    <label for="rating{{ i }}" class="star-label">
+                        <i class="bi bi-star-fill"></i>
+                    </label>
+                    {% endfor %}
+                </div>
+                <small class="text-muted">Selecciona de 1 a 5 estrellas</small>
+            </div>
+
+            <!-- Comentario -->
+            <div class="mb-3">
+                <label for="text" class="form-label">Comentario <span class="text-danger">*</span></label>
+                <textarea 
+                    class="form-control" 
+                    id="text" 
+                    name="text" 
+                    rows="4" 
+                    required
+                    maxlength="500">{% if review %}{{ review.text }}{% endif %}</textarea>
+                <div class="d-flex justify-content-between mt-1">
+                    <div class="invalid-feedback">
+                        Por favor ingresa el comentario.
+                    </div>
+                    <small class="text-muted" id="charCount">0 / 500 caracteres</small>
+                </div>
+            </div>
+
+            <!-- Fecha -->
+            <div class="mb-3">
+                <label for="date" class="form-label">Fecha <span class="text-danger">*</span></label>
+                <input 
+                    type="date" 
+                    class="form-control" 
+                    id="date" 
+                    name="date" 
+                    value="{% if review and review.date and review.date|length == 10 %}{{ review.date }}{% endif %}" 
+                    required
+                >
+                <div class="invalid-feedback">
+                    Por favor selecciona una fecha.
+                </div>
+                <small class="text-muted">El frontend calculará "Hace X días/semanas" automáticamente</small>
+            </div>
+
+            <!-- Estado activo (solo si existe el campo) -->
+            {% if not review or 'is_active' in review %}
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        id="is_active" 
+                        name="is_active"
+                        {% if (review and review.get('is_active', True)) or not review %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="is_active">
+                        Review activa (visible en el sitio web)
+                    </label>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Botones -->
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i>
+                    {% if review %}Actualizar{% else %}Crear{% endif %} Review
+                </button>
+                <a href="{{ url_for('reviews.list') }}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.rating-input {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.rating-input input[type="radio"] {
+    display: none;
+}
+
+.star-label {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+    margin: 0;
+}
+
+.rating-input input[type="radio"]:checked ~ .star-label,
+.rating-input input[type="radio"]:checked + .star-label,
+.star-label:hover,
+.star-label:hover ~ .star-label {
+    color: #ffc107;
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validación de formulario Bootstrap
+(function() {
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+
+// Contador de caracteres
+const textField = document.getElementById('text');
+const charCount = document.getElementById('charCount');
+
+function updateCharCount() {
+    const count = textField.value.length;
+    charCount.textContent = count + ' / 500 caracteres';
+}
+
+textField.addEventListener('input', updateCharCount);
+// Actualizar al cargar la página
+updateCharCount();
+</script>
+{% endblock %}

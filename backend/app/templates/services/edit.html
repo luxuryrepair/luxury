@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Servicio - {{ service.title }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('services.list') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Editar Servicio</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('services.edit', service_id=service.id) }}" enctype="multipart/form-data">
+                    <!-- Título -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold">Título *</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ service.title }}" required>
+                        <small class="text-muted">El slug se generará automáticamente a partir del título</small>
+                    </div>
+                    
+                    <!-- Botón Mágico IA -->
+                    <div class="mb-4">
+                        <div class="alert alert-warning d-flex align-items-center justify-content-between">
+                            <div>
+                                <i class="bi bi-magic"></i>
+                                <strong>Regenerar con IA</strong>
+                                <p class="mb-0 small">⚠️ Esto sobrescribirá la descripción y el contenido actual.</p>
+                            </div>
+                            <button type="button" class="btn btn-warning" id="generateContentBtn" onclick="generateContent()">
+                                <i class="bi bi-stars"></i> Regenerar con IA
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Imagen con vista previa -->
+                    <div class="mb-3">
+                        <label for="image" class="form-label fw-semibold">Imagen del Servicio</label>
+                        
+                        {% if service.image_url %}
+                        <div class="mb-3">
+                            <p class="text-muted mb-2">Imagen actual:</p>
+                            <img src="{{ service.image_url }}" alt="{{ service.title }}" class="img-thumbnail" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex gap-2 mb-2">
+                            <label for="image" class="btn btn-outline-primary flex-fill">
+                                <i class="bi bi-upload"></i> Subir Nueva Imagen
+                                <input type="file" class="d-none" id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" onchange="previewImage(event)">
+                            </label>
+                            <button type="button" class="btn btn-outline-secondary flex-fill" onclick="openImageGallery()">
+                                <i class="bi bi-images"></i> Seleccionar de Galería
+                            </button>
+                        </div>
+                        
+                        <small class="text-muted">Sube una nueva imagen o selecciona una ya existente. Se optimizará automáticamente (máx. 1920px, 85% calidad)</small>
+                        
+                        <!-- Campo oculto para URL de imagen seleccionada -->
+                        <input type="hidden" id="selected_image_url" name="selected_image_url" value="">
+                        
+                        <!-- Vista previa de nueva imagen -->
+                        <div id="imagePreview" class="mt-3" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <p class="text-muted mb-0">Nueva imagen (vista previa):</p>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearImagePreview()">
+                                    <i class="bi bi-x-circle"></i> Quitar
+                                </button>
+                            </div>
+                            <img id="preview" src="" alt="Vista previa" class="img-thumbnail" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                        </div>
+                    </div>
+                    
+                    <!-- Descripción corta -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold">Descripción Corta *</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required>{{ service.description }}</textarea>
+                        <small class="text-muted">Se muestra en las tarjetas de servicios (máx. 150 caracteres)</small>
+                    </div>
+                    
+                    <!-- Descripción larga -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="long_description" class="form-label fw-semibold mb-0">Contenido Completo *</label>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleEditorView">
+                                <i class="bi bi-code-slash"></i> Ver HTML
+                            </button>
+                        </div>
+                        
+                        <!-- Editor Quill (vista visual) -->
+                        <div id="editor" style="height: 300px; background: white;"></div>
+                        
+                        <!-- Textarea oculto para el formulario -->
+                        <textarea class="form-control" id="long_description" name="long_description" style="display: none;">{{ service.long_description }}</textarea>
+                        
+                        <!-- Vista HTML (inicialmente oculta) -->
+                        <textarea class="form-control" id="htmlView" rows="15" style="font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; display: none;"></textarea>
+                        
+                        <small class="text-muted d-block mt-2">Usa el editor visual para dar formato al contenido. Puedes alternar a vista HTML para edición avanzada.</small>
+                    </div>
+                    
+                    <!-- Icono -->
+                    <div class="mb-3">
+                        <label for="icon_name" class="form-label fw-semibold">Icono (Lucide React)</label>
+                        <input type="text" class="form-control" id="icon_name" name="icon_name" value="{{ service.icon_name }}" placeholder="Wrench">
+                        <small class="text-muted">Nombre del icono de <a href="https://lucide.dev/icons/" target="_blank">Lucide Icons</a></small>
+                    </div>
+                    
+                    <!-- Orden de visualización -->
+                    <div class="mb-3">
+                        <label for="display_order" class="form-label fw-semibold">Orden de Visualización</label>
+                        <input type="number" class="form-control" id="display_order" name="display_order" value="{{ service.display_order }}" min="1">
+                        <small class="text-muted">Los servicios se ordenan de menor a mayor</small>
+                    </div>
+                    
+                    <!-- Checkboxes -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured" {% if service.is_featured %}checked{% endif %}>
+                            <label class="form-check-label" for="is_featured">
+                                <strong>Destacado</strong> - Aparece en Home y Footer
+                            </label>
+                        </div>
+                        
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if service.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                                <strong>Activo</strong> - Visible en el sitio web
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('services.list') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Panel lateral con preview -->
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">Vista Previa</h5>
+                <div class="border rounded p-3 bg-white">
+                    <p class="text-muted small mb-2">Slug generado:</p>
+                    <code id="slug-preview">{{ service.slug }}</code>
+                    
+                    <hr>
+                    
+                    <p class="text-muted small mb-2">Estado:</p>
+                    {% if service.is_active %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                    
+                    {% if service.is_featured %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-star-fill"></i> Destacado
+                        </span>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <p class="text-muted small mb-2">URL final:</p>
+                    <small><code>/servicios/{{ service.slug }}</code></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ========== EDITOR QUILL ==========
+let quill;
+let isHtmlView = false;
+
+// Inicializar Quill Editor
+document.addEventListener('DOMContentLoaded', function() {
+    const toolbarOptions = [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        ['link', 'image'],
+        ['clean']
+    ];
+
+    quill = new Quill('#editor', {
+        modules: {
+            toolbar: toolbarOptions
+        },
+        theme: 'snow',
+        placeholder: 'Escribe el contenido completo del servicio aquí...'
+    });
+    
+    // Cargar contenido existente
+    const existingContent = document.getElementById('long_description').value;
+    if (existingContent) {
+        quill.root.innerHTML = existingContent;
+    }
+    
+    const longDescriptionField = document.getElementById('long_description');
+    const htmlView = document.getElementById('htmlView');
+
+    function isEditorContentEmpty(content) {
+        const plainText = content
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .trim();
+        return plainText.length === 0;
+    }
+
+    // Sincronizar y validar contenido antes de enviar el formulario
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let htmlContent;
+
+        if (isHtmlView) {
+            // Si estamos en vista HTML, tomar el valor del textarea HTML
+            htmlContent = htmlView.value;
+        } else {
+            // Si estamos en vista visual, tomar el HTML de Quill
+            htmlContent = quill.root.innerHTML;
+        }
+
+        longDescriptionField.value = htmlContent;
+
+        if (isEditorContentEmpty(htmlContent)) {
+            e.preventDefault();
+            alert('⚠️ El campo "Contenido Completo" es obligatorio');
+
+            if (isHtmlView) {
+                htmlView.focus();
+            } else {
+                quill.focus();
+            }
+        }
+    });
+    
+    // Event listener para el botón toggle
+    document.getElementById('toggleEditorView').addEventListener('click', function() {
+        console.log('Toggle clicked, current view:', isHtmlView ? 'HTML' : 'Visual');
+        
+        const editor = document.getElementById('editor');
+        const htmlView = document.getElementById('htmlView');
+        const toggleBtn = document.getElementById('toggleEditorView');
+        
+        if (!editor || !htmlView || !toggleBtn) {
+            console.error('Elements not found:', { editor, htmlView, toggleBtn });
+            return;
+        }
+        
+        if (isHtmlView) {
+            // Cambiar de HTML a visual
+            console.log('Switching to Visual view');
+            const htmlContent = htmlView.value;
+            quill.root.innerHTML = htmlContent;
+            
+            editor.style.display = 'block';
+            htmlView.style.display = 'none';
+            toggleBtn.innerHTML = '<i class="bi bi-code-slash"></i> Ver HTML';
+            isHtmlView = false;
+        } else {
+            // Cambiar de visual a HTML
+            console.log('Switching to HTML view');
+            const htmlContent = quill.root.innerHTML;
+            htmlView.value = htmlContent;
+            
+            editor.style.display = 'none';
+            htmlView.style.display = 'block';
+            toggleBtn.innerHTML = '<i class="bi bi-eye"></i> Ver Visual';
+            isHtmlView = true;
+        }
+        
+        console.log('Toggle complete, new view:', isHtmlView ? 'HTML' : 'Visual');
+    });
+});
+
+// Vista previa de imagen desde archivo
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreview');
+    const selectedUrlInput = document.getElementById('selected_image_url');
+    
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewContainer.style.display = 'block';
+            // Limpiar URL seleccionada si se sube un archivo
+            selectedUrlInput.value = '';
+        };
+        
+        reader.readAsDataURL(file);
+    } else {
+        previewContainer.style.display = 'none';
+    }
+}
+
+// Limpiar vista previa de imagen
+function clearImagePreview() {
+    const imageInput = document.getElementById('image');
+    const selectedUrlInput = document.getElementById('selected_image_url');
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreview');
+    
+    imageInput.value = '';
+    selectedUrlInput.value = '';
+    preview.src = '';
+    previewContainer.style.display = 'none';
+}
+
+// Abrir modal de galería
+async function openImageGallery() {
+    const modal = new bootstrap.Modal(document.getElementById('galleryModal'));
+    modal.show();
+    await loadGalleryImages();
+}
+
+// Cargar imágenes de la galería
+async function loadGalleryImages() {
+    const galleryGrid = document.getElementById('galleryGrid');
+    const galleryLoading = document.getElementById('galleryLoading');
+    const galleryEmpty = document.getElementById('galleryEmpty');
+    
+    galleryLoading.style.display = 'flex';
+    galleryGrid.innerHTML = '';
+    galleryEmpty.style.display = 'none';
+    
+    try {
+        const response = await fetch('/images/list-files');
+        const data = await response.json();
+        
+        if (data.success && data.images && data.images.length > 0) {
+            data.images.forEach(image => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3';
+                col.innerHTML = `
+                    <div class="card h-100" style="cursor: pointer;" onclick="selectImageFromGallery('${image.url}')">
+                        <img src="${image.url}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="${image.name}">
+                        <div class="card-body p-2">
+                            <small class="text-muted text-truncate d-block" title="${image.name}">${image.name}</small>
+                        </div>
+                    </div>
+                `;
+                galleryGrid.appendChild(col);
+            });
+            galleryLoading.style.display = 'none';
+        } else {
+            galleryLoading.style.display = 'none';
+            galleryEmpty.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error al cargar galería:', error);
+        galleryLoading.style.display = 'none';
+        galleryEmpty.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error al cargar las imágenes';
+        galleryEmpty.style.display = 'block';
+    }
+}
+
+// Seleccionar imagen de la galería
+function selectImageFromGallery(imageUrl) {
+    const selectedUrlInput = document.getElementById('selected_image_url');
+    const imageInput = document.getElementById('image');
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreview');
+    
+    // Establecer URL seleccionada
+    selectedUrlInput.value = imageUrl;
+    
+    // Limpiar el input de archivo
+    imageInput.value = '';
+    
+    // Mostrar vista previa
+    preview.src = imageUrl;
+    previewContainer.style.display = 'block';
+    
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('galleryModal'));
+    modal.hide();
+}
+
+// Actualizar preview del slug en tiempo real
+document.getElementById('title').addEventListener('input', function(e) {
+    const slug = e.target.value
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remover acentos
+        .replace(/[^a-z0-9]+/g, '-') // Reemplazar no alfanuméricos con guión
+        .replace(/^-+|-+$/g, ''); // Remover guiones al inicio/fin
+    
+    document.getElementById('slug-preview').textContent = slug;
+});
+
+// ========== GENERACIÓN DE CONTENIDO CON IA ==========
+async function generateContent() {
+    const titleInput = document.getElementById('title');
+    const descriptionTextarea = document.getElementById('description');
+    const generateBtn = document.getElementById('generateContentBtn');
+    
+    const title = titleInput.value.trim();
+    if (!title) {
+        alert('⚠️ Por favor, ingresa un título primero');
+        return;
+    }
+    
+    // Confirmar regeneración (solo en edit)
+    if (!confirm('⚠️ Esto sobrescribirá la descripción y contenido actual. ¿Continuar?')) {
+        return;
+    }
+    
+    // Guardar estado original del botón
+    const originalBtnHTML = generateBtn.innerHTML;
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando...';
+    
+    try {
+        const response = await fetch('/services/generate-content', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ title: title })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // Poblar descripción
+            descriptionTextarea.value = data.description;
+            
+            // Poblar editor Quill con HTML
+            if (quill) {
+                quill.root.innerHTML = data.long_description;
+            }
+            
+            // Mensaje de éxito
+            alert('✅ Contenido regenerado exitosamente con IA');
+        } else {
+            // Mostrar error del servidor
+            alert('❌ Error: ' + (data.error || 'No se pudo generar el contenido'));
+        }
+    } catch (error) {
+        console.error('Error al generar contenido:', error);
+        alert('❌ Error de conexión. Por favor, intenta de nuevo.');
+    } finally {
+        // Restaurar botón en todos los casos
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = originalBtnHTML;
+    }
+}
+</script>
+
+<!-- Modal de Galería de Imágenes -->
+<div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="galleryModalLabel">
+                    <i class="bi bi-images"></i> Seleccionar Imagen de la Galería
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Indicador de carga -->
+                <div id="galleryLoading" class="d-flex align-items-center justify-content-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <span class="ms-2">Cargando imágenes...</span>
+                </div>
+                
+                <!-- Grid de imágenes -->
+                <div id="galleryGrid" class="row g-3" style="max-height: 500px; overflow-y: auto;">
+                    <!-- Las imágenes se cargarán aquí dinámicamente -->
+                </div>
+                
+                <!-- Mensaje cuando no hay imágenes -->
+                <div id="galleryEmpty" class="alert alert-info" style="display: none;">
+                    <i class="bi bi-info-circle"></i> No hay imágenes disponibles. Puedes subir imágenes desde la sección <a href="{{ url_for('images.list') }}" target="_blank">Gestión de Imágenes</a>.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <a href="{{ url_for('images.list') }}" target="_blank" class="btn btn-outline-primary">
+                    <i class="bi bi-upload"></i> Ir a Subir Nueva Imagen
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+# Flask Framework
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+
+# Supabase Client
+ supabase>=2.0.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Authentication
+Flask-Login>=0.6.3
+Werkzeug>=3.0.0
+
+# Forms & Validation
+WTForms>=3.1.0
+Flask-WTF>=1.2.0
+
+# Utils
+python-slugify>=8.0.0
+
+# AI Generation
+groq>=0.4.0

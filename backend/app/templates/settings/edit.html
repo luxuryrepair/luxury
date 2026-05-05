@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-sliders"></i> Configuración</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Información pública del negocio</h5>
+                <small class="text-muted">Estos datos se muestran en el sitio web (contacto, footer, etc.)</small>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('settings.save') }}">
+                    {% for field in business_fields %}
+                    <div class="mb-3">
+                        <label for="{{ field.key }}" class="form-label fw-semibold">{{ field.label }}</label>
+                        {% if field.key == 'business_maps_embed' %}
+                        <textarea class="form-control font-monospace"
+                                  id="{{ field.key }}"
+                                  name="{{ field.key }}"
+                                  rows="3"
+                                  placeholder="https://www.google.com/maps/embed?pb=...">{{ settings.get(field.key, '') }}</textarea>
+                        <div class="form-text">Pega la URL del iframe de Google Maps (no el iframe completo, solo el src).</div>
+                        {% else %}
+                        <input type="{{ field.type }}"
+                               class="form-control"
+                               id="{{ field.key }}"
+                               name="{{ field.key }}"
+                               value="{{ settings.get(field.key, '') }}">
+                        {% if field.key == 'business_phone' %}
+                        <div class="form-text">Usa <code>|</code> para separar número de horario telefónico. Ej: <em>+34 916 95 07 81 | Atención: 9:00-21:00</em></div>
+                        {% elif field.key == 'business_coordinates_lat' or field.key == 'business_coordinates_lng' %}
+                        <div class="form-text">Coordenadas decimales. Ej: latitud <code>40.302205</code>, longitud <code>-3.7329539</code></div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-robot"></i> Configuración de IA (Groq)</h5>
+
+                    {% for field in ai_fields %}
+                    <div class="mb-3">
+                        {% if field.type == 'checkbox' %}
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="{{ field.key }}" name="{{ field.key }}"
+                                   {% if settings.get(field.key, field.default) == 'true' %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="{{ field.key }}">{{ field.label }}</label>
+                        </div>
+                        {% elif field.key == 'groq_api_key' %}
+                        <label for="{{ field.key }}" class="form-label fw-semibold">{{ field.label }}</label>
+                        <input type="password"
+                               class="form-control"
+                               id="{{ field.key }}"
+                               name="{{ field.key }}"
+                               placeholder="{{ 'Dejar vacío para mantener la actual' if has_groq_api_key else 'Pega tu API key de Groq' }}"
+                               value="">
+                        <div class="form-text">
+                            {% if has_groq_api_key %}
+                            Ya existe una API key guardada. Si no escribes una nueva, se mantiene la actual.
+                            {% else %}
+                            Aún no hay API key guardada.
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <label for="{{ field.key }}" class="form-label fw-semibold">{{ field.label }}</label>
+                        <input type="{{ field.type }}"
+                               class="form-control"
+                               id="{{ field.key }}"
+                               name="{{ field.key }}"
+                               value="{{ settings.get(field.key, field.default if field.default is defined else '') }}">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <hr>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar cambios
+                        </button>
+                        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-info-circle"></i> Ayuda
+            </div>
+            <div class="card-body small">
+                <p>Los cambios aquí se guardan en la base de datos y el frontend los carga automáticamente.</p>
+                <ul class="ps-3 mb-0">
+                    <li><strong>Teléfono:</strong> usa <code>|</code> para separar el número del horario de atención.</li>
+                    <li><strong>Coordenadas:</strong> puedes obtenerlas de Google Maps haciendo clic derecho sobre el punto.</li>
+                    <li><strong>Maps Embed:</strong> en Google Maps → Compartir → Insertar mapa → copia solo el valor del atributo <code>src</code>.</li>
+                    <li><strong>Groq API Key:</strong> nunca se muestra completa; deja el campo vacío para conservar la actual.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

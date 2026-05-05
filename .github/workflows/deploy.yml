@@ -1,0 +1,96 @@
+name: Deploy to GitHub Pages
+
+# Ejecutar en push a main o manualmente
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Permisos necesarios para escribir en gh-pages
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      # 1. Checkout del código
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # 3. Instalar dependencias
+      - name: Instalar dependencias
+        working-directory: ./frontend
+        run: npm ci
+
+      # 4. Validar secrets obligatorios
+      - name: Validar secrets configurados
+        run: |
+          echo "Validando secrets obligatorios..."
+          MISSING=()
+
+          [ -z "$SUPABASE_URL" ]       && MISSING+=("NEXT_PUBLIC_SUPABASE_URL")
+          [ -z "$SUPABASE_ANON_KEY" ]  && MISSING+=("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "ERROR: faltan secrets obligatorios:"
+            for s in "${MISSING[@]}"; do echo "  - $s"; done
+            exit 1
+          fi
+
+          echo "Secrets obligatorios OK."
+
+          # Avisos opcionales
+          [ -z "$EMAILJS_SERVICE_ID" ]          && echo "AVISO: NEXT_PUBLIC_EMAILJS_SERVICE_ID no configurado"
+          [ -z "$EMAILJS_TEMPLATE_BUSINESS_ID" ] && echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID no configurado"
+          [ -z "$EMAILJS_TEMPLATE_CLIENT_ID" ]   && echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID no configurado"
+          [ -z "$EMAILJS_PUBLIC_KEY" ]           && echo "AVISO: NEXT_PUBLIC_EMAILJS_PUBLIC_KEY no configurado"
+          [ -z "$GOOGLE_MAPS_API_KEY" ]          && echo "AVISO: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY no configurado"
+        env:
+          SUPABASE_URL:                  ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY:             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          EMAILJS_SERVICE_ID:            ${{ secrets.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_BUSINESS_ID:  ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID }}
+          EMAILJS_TEMPLATE_CLIENT_ID:    ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID }}
+          EMAILJS_PUBLIC_KEY:            ${{ secrets.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY }}
+          GOOGLE_MAPS_API_KEY:           ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+
+      # 5. Build Next.js (static export → carpeta out/)
+      - name: Build proyecto
+        working-directory: ./frontend
+        run: npm run build
+        env:
+          # Supabase — obligatorios (la info del negocio viene de la DB, no de secrets)
+          NEXT_PUBLIC_SUPABASE_URL:                  ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY:             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # EmailJS — opcionales
+          NEXT_PUBLIC_EMAILJS_SERVICE_ID:            ${{ secrets.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}
+          NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID:  ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID }}
+          NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID:    ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID }}
+          NEXT_PUBLIC_EMAILJS_PUBLIC_KEY:            ${{ secrets.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY }}
+          # Google Maps embed — opcional
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:           ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+
+      # 6. Deploy a GitHub Pages (rama gh-pages)
+      - name: Deploy a gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/out
+          publish_branch: gh-pages
+          # cname: telerayo.com  # Descomentar si tienes dominio personalizado
+          commit_message: 'chore: deploy from ${{ github.ref_name }} - ${{ github.sha }}'
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

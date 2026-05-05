@@ -1,0 +1,238 @@
+.hero {
+  background: linear-gradient(135deg, #0b0b0b 0%, #1a1200 50%, #0b0b0b 100%);
+  color: var(--text-main, #e5e5e5);
+  padding: 2rem 1rem;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #3a2a00;
+}
+
+@media (min-width: 640px) {
+  .hero {
+    padding: 3rem 1.5rem;
+    min-height: 550px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding: 4rem 1.5rem;
+    min-height: 600px;
+  }
+}
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .hero-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.875rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--silver, #cfcfcf);
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+}
+
+.highlight {
+  background: linear-gradient(120deg, #d4af37 0%, #ffd700 50%, #b8962e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--silver-mid, #8f8f8f);
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .hero-subtitle {
+    font-size: 1.125rem;
+    line-height: 1.7;
+  }
+}
+
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  font-size: 0.9375rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .btn {
+    width: auto;
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+  color: #0b0b0b;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+}
+
+.btn-secondary {
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--gold, #d4af37);
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold, #d4af37);
+}
+
+/* Trust Badges */
+.hero-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .hero-badges {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-icon {
+  font-size: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .badge-icon {
+    font-size: 1.5rem;
+  }
+}
+
+.badge-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (min-width: 640px) {
+  .badge-text {
+    font-size: 0.95rem;
+  }
+}
+
+/* Hero Image */
+.hero-image {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hero-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.image-placeholder {
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1;
+  background: rgba(212, 175, 55, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+.placeholder-icon {
+  font-size: 8rem;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+}
+
+.placeholder-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.hero-image-real {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(212, 175, 55, 0.2);
+  object-fit: cover;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-image-real:hover {
+  transform: scale(1.02);
+  box-shadow: 0 25px 50px rgba(212, 175, 55, 0.2);
+}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Servicios{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Servicios</h2>
+    <a href="{{ url_for('services.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Servicio
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if services %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Imagen</th>
+                        <th>Título</th>
+                        <th>Slug</th>
+                        <th>Orden</th>
+                        <th>Destacado</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td>
+                            {% if service.image_url %}
+                            <img src="{{ service.image_url }}" alt="{{ service.title }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ service.title }}</strong></td>
+                        <td><code>{{ service.slug }}</code></td>
+                        <td>{{ service.display_order }}</td>
+                        <td>
+                            <form action="{{ url_for('services.toggle_featured', service_id=service.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-{{ 'warning' if service.is_featured else 'outline-secondary' }}">
+                                    <i class="bi bi-star{{ '-fill' if service.is_featured else '' }}"></i>
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="{{ url_for('services.toggle_active', service_id=service.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-{{ 'success' if service.is_active else 'secondary' }}">
+                                    {{ 'Activo' if service.is_active else 'Inactivo' }}
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('services.edit', service_id=service.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteService('{{ service.id }}', '{{ service.title }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No hay servicios registrados</p>
+            <a href="{{ url_for('services.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Crear Primer Servicio
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para confirmar eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar el servicio <strong id="serviceName"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteService(id, name) {
+    document.getElementById('serviceName').textContent = name;
+    document.getElementById('deleteForm').action = `/services/${id}/delete`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% endblock %}

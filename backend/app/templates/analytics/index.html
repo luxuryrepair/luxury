@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold">
+            <i class="bi bi-bar-chart-line me-2"></i>Analytics
+        </h2>
+        <p class="text-muted mb-0">Estadísticas detalladas del tráfico web</p>
+    </div>
+    <div id="analytics-loading" class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+</div>
+
+<!-- Resumen de Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 opacity-75">Total Eventos</h6>
+                        <h2 class="fw-bold mb-0">{{ stats.total_events | default(0) }}</h2>
+                    </div>
+                    <i class="bi bi-calendar-event" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 opacity-75">Total Pageviews</h6>
+                        <h2 class="fw-bold mb-0">{{ stats.total_pageviews | default(0) }}</h2>
+                    </div>
+                    <i class="bi bi-eye" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 opacity-75">Páginas Únicas</h6>
+                        <h2 class="fw-bold mb-0">{{ stats.unique_pages | default(0) }}</h2>
+                    </div>
+                    <i class="bi bi-file-earmark-text" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos de Analytics -->
+<div class="row mb-4">
+    <!-- Pageviews por Día -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-graph-up me-2"></i>Pageviews - Últimos 30 Días
+                </h5>
+                <canvas id="pageviewsChart" height="60"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Dispositivos -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-phone me-2"></i>Dispositivos
+                </h5>
+                <canvas id="devicesChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orígenes de Tráfico -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-signpost-2 me-2"></i>Orígenes de Tráfico
+                </h5>
+                <canvas id="trafficChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Páginas Más Visitadas -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-trophy me-2"></i>Top 10 Páginas Más Visitadas
+                </h5>
+                <canvas id="topPagesChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Datos Detallados -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-table me-2"></i>Datos Detallados
+                </h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped" id="pagesTable">
+                        <thead>
+                            <tr>
+                                <th>Página</th>
+                                <th class="text-end">Visitas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagesTableBody">
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Cargando datos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Cargar y renderizar todos los gráficos de analytics
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingSpinner = document.getElementById('analytics-loading');
+    
+    // Fetch de datos de analytics
+    fetch('{{ url_for("dashboard.analytics_stats") }}')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error HTTP: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(result => {
+            console.log('Datos de analytics recibidos:', result);
+            
+            if (result.success) {
+                const data = result.data;
+                console.log('Pageviews by day:', data.pageviews_by_day);
+                console.log('Device stats:', data.device_stats);
+                console.log('Top pages:', data.top_pages);
+                console.log('Traffic origins:', data.traffic_origins);
+                
+                renderAllCharts(data);
+                populateTable(data.top_pages);
+            } else {
+                console.error('Error al cargar analytics:', result.error);
+                alert('Error al cargar analytics: ' + result.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar analytics:', error);
+            alert('Error de conexión al cargar analytics');
+        })
+        .finally(() => {
+            loadingSpinner.style.display = 'none';
+        });
+});
+
+function renderAllCharts(data) {
+    // Configuración común para gráficos
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom'
+            }
+        }
+    };
+    
+    // 1. Gráfico de Pageviews por Día (Línea con Área)
+    const pageviewsCtx = document.getElementById('pageviewsChart').getContext('2d');
+    const pageviewsData = data.pageviews_by_day || [];
+    
+    new Chart(pageviewsCtx, {
+        type: 'line',
+        data: {
+            labels: pageviewsData.map(item => {
+                const date = new Date(item.date);
+                return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+            }),
+            datasets: [{
+                label: 'Pageviews',
+                data: pageviewsData.map(item => item.count),
+                borderColor: 'rgb(102, 126, 234)',
+                backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: 'rgb(102, 126, 234)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(102, 126, 234)',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    // 2. Gráfico de Dispositivos (Doughnut)
+    const devicesCtx = document.getElementById('devicesChart').getContext('2d');
+    const devicesData = data.device_stats || [];
+    
+    new Chart(devicesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: devicesData.map(item => {
+                const labels = {
+                    'desktop': 'Desktop',
+                    'mobile': 'Móvil',
+                    'tablet': 'Tablet',
+                    'unknown': 'Desconocido'
+                };
+                return labels[item.device] || item.device;
+            }),
+            datasets: [{
+                data: devicesData.map(item => item.count),
+                backgroundColor: [
+                    'rgb(102, 126, 234)',
+                    'rgb(118, 75, 162)',
+                    'rgb(255, 193, 7)',
+                    'rgb(220, 53, 69)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            ...commonOptions,
+            cutout: '60%'
+        }
+    });
+    
+    // 3. Gráfico de Top Páginas (Barra Horizontal)
+    const topPagesCtx = document.getElementById('topPagesChart').getContext('2d');
+    const topPagesData = data.top_pages || [];
+    
+    new Chart(topPagesCtx, {
+        type: 'bar',
+        data: {
+            labels: topPagesData.map(item => {
+                // Acortar URLs largas
+                let page = item.page;
+                if (page.length > 50) {
+                    page = page.substring(0, 50) + '...';
+                }
+                return page;
+            }),
+            datasets: [{
+                label: 'Visitas',
+                data: topPagesData.map(item => item.count),
+                backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                borderColor: 'rgb(102, 126, 234)',
+                borderWidth: 2,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            ...commonOptions,
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    // 4. Gráfico de Orígenes de Tráfico (Pie)
+    const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+    const trafficData = data.traffic_origins || [];
+    
+    new Chart(trafficCtx, {
+        type: 'pie',
+        data: {
+            labels: trafficData.map(item => {
+                const labels = {
+                    'direct': 'Directo',
+                    'organic': 'Orgánico (SEO)',
+                    'referral': 'Referencia',
+                    'social': 'Redes Sociales',
+                    'unknown': 'Desconocido'
+                };
+                return labels[item.origin] || item.origin;
+            }),
+            datasets: [{
+                data: trafficData.map(item => item.count),
+                backgroundColor: [
+                    'rgb(102, 126, 234)',
+                    'rgb(40, 167, 69)',
+                    'rgb(255, 193, 7)',
+                    'rgb(23, 162, 184)',
+                    'rgb(220, 53, 69)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: commonOptions
+    });
+}
+
+function populateTable(topPages) {
+    const tbody = document.getElementById('pagesTableBody');
+    
+    if (topPages.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No hay datos disponibles</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = topPages.map(item => `
+        <tr>
+            <td><code>${item.page}</code></td>
+            <td class="text-end"><strong>${item.count}</strong></td>
+        </tr>
+    `).join('');
+}
+</script>
+{% endblock %}

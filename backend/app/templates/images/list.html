@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Imágenes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Gestión de Imágenes</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="mb-4">
+            <h5 class="fw-bold">Subir Nueva Imagen</h5>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="imageFile" class="form-label">Selecciona una imagen</label>
+                    <input type="file" class="form-control" id="imageFile" name="file" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" onchange="previewImage(event)" required>
+                    <small class="text-muted">Formatos permitidos: JPG, PNG, GIF, WEBP (máx. 5MB). Se optimizará automáticamente.</small>
+                </div>
+                
+                <!-- Vista previa de la imagen -->
+                <div id="imagePreviewContainer" class="mb-3" style="display: none;">
+                    <label class="form-label fw-semibold">Vista previa:</label>
+                    <div class="border rounded p-3 bg-light">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <img id="preview" src="" alt="Vista previa" class="img-fluid rounded" style="max-height: 300px; object-fit: contain;">
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Información del archivo:</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <span class="text-muted">Nombre:</span>
+                                        <br><strong id="fileName">-</strong>
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="text-muted">Tamaño:</span>
+                                        <br><strong id="fileSize">-</strong>
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="text-muted">Dimensiones:</span>
+                                        <br><strong id="fileDimensions">Cargando...</strong>
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="text-muted">Tipo:</span>
+                                        <br><strong id="fileType">-</strong>
+                                    </li>
+                                </ul>
+                                <div class="alert alert-info small mb-0">
+                                    <i class="bi bi-info-circle"></i> La imagen se redimensionará a máx. 1920px y se comprimirá al 85% de calidad JPEG.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit" id="uploadBtn" disabled>
+                        <i class="bi bi-upload"></i> Subir Imagen
+                    </button>
+                    <button class="btn btn-outline-secondary" type="button" onclick="resetForm()">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+            
+            <div id="uploadStatus" class="mt-3"></div>
+        </div>
+        
+        <hr>
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">Galería de Imágenes</h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="loadGallery()">
+                <i class="bi bi-arrow-clockwise"></i> Recargar
+            </button>
+        </div>
+        
+        <div id="galleryLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-muted mt-2">Cargando imágenes...</p>
+        </div>
+        
+        <div id="imageGallery" class="row g-3" style="display: none;">
+            <!-- Las imágenes se cargarán dinámicamente aquí -->
+        </div>
+        
+        <div id="galleryEmpty" class="alert alert-info" style="display: none;">
+            <i class="bi bi-info-circle"></i> No hay imágenes subidas aún. Sube tu primera imagen usando el formulario anterior.
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ver imagen completa -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalTitle">Vista previa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="" class="img-fluid">
+            </div>
+            <div class="modal-footer">
+                <input type="text" class="form-control" id="modalImageUrl" readonly>
+                <button type="button" class="btn btn-primary" onclick="copyModalUrl()">
+                    <i class="bi bi-clipboard"></i> Copiar URL
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Cargar galería al iniciar la página
+document.addEventListener('DOMContentLoaded', function() {
+    loadGallery();
+});
+
+// Cargar galería de imágenes
+async function loadGallery() {
+    const gallery = document.getElementById('imageGallery');
+    const loading = document.getElementById('galleryLoading');
+    const empty = document.getElementById('galleryEmpty');
+    
+    loading.style.display = 'block';
+    gallery.style.display = 'none';
+    empty.style.display = 'none';
+    
+    try {
+        const response = await fetch('/images/list-files');
+        const data = await response.json();
+        
+        if (data.success && data.images && data.images.length > 0) {
+            gallery.innerHTML = '';
+            
+            data.images.forEach(image => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 col-lg-3';
+                
+                const card = document.createElement('div');
+                card.className = 'card h-100';
+                
+                card.innerHTML = `
+                    <img src="${image.url}" class="card-img-top" style="height: 200px; object-fit: cover; cursor: pointer;" 
+                         onclick="viewImage('${image.url}', '${image.name}')" alt="${image.name}">
+                    <div class="card-body">
+                        <h6 class="card-title small text-truncate" title="${image.name}">${image.name}</h6>
+                        <p class="card-text small text-muted mb-2">
+                            ${formatFileSize(image.size)}
+                        </p>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-primary flex-fill" onclick="copyImageUrl('${image.url}')">
+                                <i class="bi bi-clipboard"></i> Copiar
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteImage('${image.path}', '${image.name}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                col.appendChild(card);
+                gallery.appendChild(col);
+            });
+            
+            loading.style.display = 'none';
+            gallery.style.display = 'flex';
+        } else {
+            loading.style.display = 'none';
+            empty.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error al cargar galería:', error);
+        loading.style.display = 'none';
+        empty.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Error al cargar imágenes: ${error.message}`;
+        empty.style.display = 'block';
+    }
+}
+
+// Ver imagen en modal
+function viewImage(url, name) {
+    document.getElementById('modalImage').src = url;
+    document.getElementById('imageModalTitle').textContent = name;
+    document.getElementById('modalImageUrl').value = url;
+    new bootstrap.Modal(document.getElementById('imageModal')).show();
+}
+
+// Copiar URL desde modal
+function copyModalUrl() {
+    const input = document.getElementById('modalImageUrl');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(() => {
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Copiado';
+        setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+    });
+}
+
+// Copiar URL de imagen
+function copyImageUrl(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i>';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.add('btn-outline-primary');
+            btn.classList.remove('btn-success');
+        }, 2000);
+    });
+}
+
+// Eliminar imagen
+async function deleteImage(path, name) {
+    if (!confirm(`¿Eliminar la imagen "${name}"?\n\nEsta acción no se puede deshacer.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/images/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ file_path: path })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadGallery(); // Recargar galería
+            alert('✅ Imagen eliminada correctamente');
+        } else {
+            alert('❌ Error al eliminar: ' + data.error);
+        }
+    } catch (error) {
+        alert('❌ Error: ' + error.message);
+    }
+}
+
+// Vista previa de imagen
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    if (!file) {
+        previewContainer.style.display = 'none';
+        uploadBtn.disabled = true;
+        return;
+    }
+    
+    // Verificar que sea una imagen
+    if (!file.type.startsWith('image/')) {
+        alert('Por favor selecciona un archivo de imagen válido');
+        event.target.value = '';
+        return;
+    }
+    
+    // Verificar tamaño (máx 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        alert('El archivo es demasiado grande. Máximo 5MB permitido.');
+        event.target.value = '';
+        return;
+    }
+    
+    // Mostrar información del archivo
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    document.getElementById('fileType').textContent = file.type;
+    
+    // Leer y mostrar vista previa
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+        
+        // Obtener dimensiones de la imagen
+        const img = new Image();
+        img.onload = function() {
+            document.getElementById('fileDimensions').textContent = `${this.width} × ${this.height} px`;
+            
+            // Advertencia si es muy pequeña
+            if (this.width < 800 || this.height < 600) {
+                document.getElementById('fileDimensions').innerHTML += 
+                    '<br><small class="text-warning"><i class="bi bi-exclamation-triangle"></i> Resolución baja</small>';
+            }
+        };
+        img.src = e.target.result;
+        
+        previewContainer.style.display = 'block';
+        uploadBtn.disabled = false;
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+// Formatear tamaño de archivo
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Resetear formulario
+function resetForm() {
+    document.getElementById('uploadForm').reset();
+    document.getElementById('imagePreviewContainer').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = true;
+    document.getElementById('uploadStatus').innerHTML = '';
+}
+
+// Enviar formulario
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('imageFile');
+    const file = fileInput.files[0];
+    const statusDiv = document.getElementById('uploadStatus');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    if (!file) {
+        statusDiv.innerHTML = '<div class="alert alert-warning">Por favor selecciona un archivo</div>';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Deshabilitar botón y mostrar progreso
+    const originalBtnHTML = uploadBtn.innerHTML;
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Subiendo...';
+    statusDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> Procesando y subiendo imagen...</div>';
+    
+    try {
+        const response = await fetch('/images/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            statusDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✅ Imagen subida exitosamente</strong>
+                    <hr>
+                    <p class="mb-1"><strong>URL Pública:</strong></p>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" value="${data.url}" readonly id="imageUrl">
+                        <button class="btn btn-outline-secondary" onclick="copyUrl()" type="button">
+                            <i class="bi bi-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                    <small class="text-muted">Usa esta URL en el campo "image_url" de tus servicios o en el contenido long_description</small>
+                </div>
+            `;
+            
+            // Resetear formulario y recargar galería
+            resetForm();
+            uploadBtn.innerHTML = originalBtnHTML;
+            loadGallery();
+        } else {
+            statusDiv.innerHTML = `<div class="alert alert-danger"><strong>❌ Error:</strong> ${data.error || 'Error desconocido'}</div>`;
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = originalBtnHTML;
+        }
+    } catch (error) {
+        console.error('Error en upload:', error);
+        statusDiv.innerHTML = `<div class="alert alert-danger"><strong>❌ Error de conexión:</strong> ${error.message}</div>`;
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = originalBtnHTML;
+    }
+});
+
+// Copiar URL al portapapeles
+function copyUrl() {
+    const input = document.getElementById('imageUrl');
+    input.select();
+    input.setSelectionRange(0, 99999); // Para móviles
+    
+    // Usar la API moderna del portapapeles
+    navigator.clipboard.writeText(input.value).then(function() {
+        // Feedback visual
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Copiado';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-secondary');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    }, function(err) {
+        alert('Error al copiar: ' + err);
+    });
+}
+</script>
+{% endblock %}
