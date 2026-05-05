@@ -53,11 +53,21 @@ jobs:
           echo "Secrets obligatorios OK."
 
           # Avisos opcionales
-          [ -z "$EMAILJS_SERVICE_ID" ]          && echo "AVISO: NEXT_PUBLIC_EMAILJS_SERVICE_ID no configurado"
-          [ -z "$EMAILJS_TEMPLATE_BUSINESS_ID" ] && echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID no configurado"
-          [ -z "$EMAILJS_TEMPLATE_CLIENT_ID" ]   && echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID no configurado"
-          [ -z "$EMAILJS_PUBLIC_KEY" ]           && echo "AVISO: NEXT_PUBLIC_EMAILJS_PUBLIC_KEY no configurado"
-          [ -z "$GOOGLE_MAPS_API_KEY" ]          && echo "AVISO: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY no configurado"
+          if [ -z "$EMAILJS_SERVICE_ID" ]; then
+            echo "AVISO: NEXT_PUBLIC_EMAILJS_SERVICE_ID no configurado"
+          fi
+          if [ -z "$EMAILJS_TEMPLATE_BUSINESS_ID" ]; then
+            echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID no configurado"
+          fi
+          if [ -z "$EMAILJS_TEMPLATE_CLIENT_ID" ]; then
+            echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID no configurado"
+          fi
+          if [ -z "$EMAILJS_PUBLIC_KEY" ]; then
+            echo "AVISO: NEXT_PUBLIC_EMAILJS_PUBLIC_KEY no configurado"
+          fi
+          if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
+            echo "AVISO: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY no configurado"
+          fi
         env:
           SUPABASE_URL:                  ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_ANON_KEY:             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
