@@ -61,7 +61,7 @@ export default function Footer() {
     async function fetchGitHubVersion() {
       try {
         const response = await fetch(
-          'https://api.github.com/repos/getafeelectronic/miserviciotecnico/releases/latest'
+          'https://api.github.com/repos/luxuryrepair/luxury/releases/latest'
         )
         if (response.ok) {
           const data = await response.json()
