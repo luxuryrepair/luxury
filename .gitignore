@@ -49,6 +49,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+# Permitir librerias del frontend (Next.js)
+!frontend/src/lib/
+!frontend/src/lib/**
 lib64/
 parts/
 sdist/
