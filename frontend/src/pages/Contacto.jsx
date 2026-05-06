@@ -15,12 +15,16 @@ export default function Contacto() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
 
   const {
+    business_name: businessName,
     business_address: businessAddress,
     business_phone: businessPhoneRaw,
     business_email: businessEmail,
     business_hours: businessHours,
+    business_maps_embed: businessMapsEmbed,
     phoneForCall: businessPhoneForCall,
   } = useBusinessInfo()
+
+  const mapsEmbedSrc = businessMapsEmbed
 
   const onSubmit = async (data) => {
     setIsSubmitting(true)
@@ -48,7 +52,7 @@ export default function Contacto() {
         serviceId,
         templateBusinessId,
         {
-          to_name: 'Mi Servicio Técnico',
+          to_name: businessName,
           to_email: businessEmail,
           from_name: data.nombre,
           from_email: data.email,
@@ -58,7 +62,7 @@ export default function Contacto() {
           user_subject: data.asunto,
           message: data.mensaje,
           user_message: data.mensaje,
-          business_name: 'Mi Servicio Técnico',
+          business_name: businessName,
           business_email: businessEmail,
           business_phone: businessPhoneRaw
         },
@@ -247,16 +251,22 @@ export default function Contacto() {
             </div>
 
             <div className="map-card">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3042.8237583668847!2d-3.735363884604658!3d40.302205079378395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd4227f8a3d1d3b9%3A0x5c7f5c1e5c7f5c1e!2sC.%20Leoncio%20Rojas%2C%2011%2C%2028901%20Getafe%2C%20Madrid!5e0!3m2!1ses!2ses!4v1234567890123!5m2!1ses!2ses"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Reparación televisores en Getafe | Tele Rayo"
-              ></iframe>
+              {mapsEmbedSrc ? (
+                <iframe
+                  src={mapsEmbedSrc}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={`Ubicación en mapa de ${businessName}`}
+                ></iframe>
+              ) : (
+                <div className="map-empty-state">
+                  <p>Mapa no configurado.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

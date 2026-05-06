@@ -25,12 +25,12 @@ export async function generateMetadata({ params }) {
   const service = await getServiceBySlug(params.slug)
   if (!service) {
     return {
-      title: 'Servicio | Mi Servicio Técnico',
+      title: 'Servicio',
       description: 'Servicio técnico especializado en reparación de televisores en Getafe.',
     }
   }
   return {
-    title: `${service.title} | Mi Servicio Técnico`,
+    title: service.title,
     description: service.description || `${service.title} - Servicio técnico especializado en Getafe.`,
   }
 }

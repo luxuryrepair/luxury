@@ -7,7 +7,7 @@ import useBusinessInfo from '@/hooks/useBusinessInfo'
 
 export default function TermsOfService() {
   useAnalytics()
-  const { business_email: email, business_phone: phone, business_address: address, business_hours: hours, phoneForCall } = useBusinessInfo()
+  const { business_name: businessName, business_email: email, business_phone: phone, business_address: address, business_hours: hours, phoneForCall } = useBusinessInfo()
 
   const lastUpdated = '28 de abril de 2026'
 
@@ -23,13 +23,13 @@ export default function TermsOfService() {
         <div className="terms-content">
           <section className="terms-section">
             <h2>1. Aceptación de los Términos</h2>
-            <p>Bienvenido a <strong>Mi Servicio Técnico</strong>. Al acceder y utilizar nuestro sitio web o contratar nuestros servicios de reparación de televisores, aceptas estar sujeto a estos Términos de Servicio.</p>
+            <p>Bienvenido a <strong>{businessName}</strong>. Al acceder y utilizar nuestro sitio web o contratar nuestros servicios de reparación de televisores, aceptas estar sujeto a estos Términos de Servicio.</p>
             <p>Nos reservamos el derecho de modificar estos términos en cualquier momento, y tu uso continuado constituye la aceptación de dichos cambios.</p>
           </section>
 
           <section className="terms-section">
             <h2>2. Descripción del Servicio</h2>
-            <p><strong>Mi Servicio Técnico</strong> ofrece servicios profesionales de reparación y mantenimiento de televisores de diversas marcas y modelos, incluyendo:</p>
+            <p><strong>{businessName}</strong> ofrece servicios profesionales de reparación y mantenimiento de televisores de diversas marcas y modelos, incluyendo:</p>
             <ul>
               <li>Reparación de televisores LCD, LED, Plasma, OLED y QLED</li>
               <li>Diagnóstico gratuito de averías</li>
@@ -167,7 +167,7 @@ export default function TermsOfService() {
 
           <section className="terms-section">
             <h2>10. Propiedad Intelectual</h2>
-            <p>Todo el contenido del sitio web es propiedad de <strong>Mi Servicio Técnico</strong> o de sus proveedores de contenido y está protegido por las leyes de propiedad intelectual españolas e internacionales.</p>
+            <p>Todo el contenido del sitio web es propiedad de <strong>{businessName}</strong> o de sus proveedores de contenido y está protegido por las leyes de propiedad intelectual españolas e internacionales.</p>
           </section>
 
           <section className="terms-section">
@@ -193,7 +193,7 @@ export default function TermsOfService() {
             <h3>13.2. Divisibilidad</h3>
             <p>Si cualquier disposición de estos términos se considera inválida o inaplicable, las demás disposiciones seguirán siendo válidas.</p>
             <h3>13.3. Acuerdo Completo</h3>
-            <p>Estos Términos de Servicio, junto con la Política de Privacidad, constituyen el acuerdo completo entre tú y <strong>Mi Servicio Técnico</strong>.</p>
+            <p>Estos Términos de Servicio, junto con la Política de Privacidad, constituyen el acuerdo completo entre tú y <strong>{businessName}</strong>.</p>
           </section>
 
           <section className="terms-section terms-contact">
@@ -203,7 +203,7 @@ export default function TermsOfService() {
             </div>
             <p>Si tienes preguntas sobre estos Términos de Servicio, puedes contactarnos:</p>
             <div className="contact-info-box">
-              <p><strong>Mi Servicio Técnico</strong></p>
+              <p><strong>{businessName}</strong></p>
               <p><strong>Email:</strong> <a href={`mailto:${email}`}>{email}</a></p>
               <p><strong>Teléfono:</strong> <a href={`tel:${phoneForCall}`}>{phone}</a></p>
               <p><strong>Dirección:</strong> {address}</p>

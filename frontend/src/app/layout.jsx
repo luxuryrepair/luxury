@@ -15,8 +15,6 @@ import '@/styles/Servicios.css'
 import '@/styles/ServicioDetalle.css'
 import '@/styles/Contacto.css'
 import '@/styles/Nosotros.css'
-import '@/styles/Login.css'
-import '@/styles/Dashboard.css'
 import '@/styles/PrivacyPolicy.css'
 import '@/styles/TermsOfService.css'
 

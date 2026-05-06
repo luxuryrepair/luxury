@@ -6,7 +6,7 @@ import useBusinessInfo from '@/hooks/useBusinessInfo'
 
 export default function PrivacyPolicy() {
   useAnalytics()
-  const { business_email: email, business_phone: phone, business_address: address, phoneForCall } = useBusinessInfo()
+  const { business_name: businessName, business_email: email, business_phone: phone, business_address: address, phoneForCall } = useBusinessInfo()
 
   const lastUpdated = '28 de abril de 2026'
 
@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
         <div className="policy-content">
           <section className="policy-section">
             <h2>1. Introducción</h2>
-            <p>En <strong>Mi Servicio Técnico</strong> nos comprometemos a proteger y respetar tu privacidad. Esta Política de Privacidad explica cómo recopilamos, usamos, compartimos y protegemos tu información personal cuando utilizas nuestro sitio web y servicios.</p>
+            <p>En <strong>{businessName}</strong> nos comprometemos a proteger y respetar tu privacidad. Esta Política de Privacidad explica cómo recopilamos, usamos, compartimos y protegemos tu información personal cuando utilizas nuestro sitio web y servicios.</p>
             <p>Al utilizar nuestro sitio web, aceptas las prácticas descritas en esta política.</p>
           </section>
 
@@ -153,7 +153,7 @@ export default function PrivacyPolicy() {
             </div>
             <p>Si tienes preguntas o deseas ejercer tus derechos, puedes contactarnos:</p>
             <div className="contact-info-box">
-              <p><strong>Mi Servicio Técnico</strong></p>
+              <p><strong>{businessName}</strong></p>
               <p><strong>Email:</strong> <a href={`mailto:${email}`}>{email}</a></p>
               <p><strong>Teléfono:</strong> <a href={`tel:${phoneForCall}`}>{phone}</a></p>
               <p><strong>Dirección:</strong> {address}</p>
