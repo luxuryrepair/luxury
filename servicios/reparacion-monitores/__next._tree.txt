@@ -1,2 +1,2 @@
-:HL["/luxury/_next/static/chunks/0ut1c6s_6gcr3.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"servicios","param":null,"prefetchHints":0,"slots":{"children":{"name":"slug","param":{"type":"d","key":"reparacion-monitores","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"76BTNx-h_Gjy8_RCmQ2ae"}
+:HL["/luxury/_next/static/chunks/0zhd~d3fe-6pp.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"servicios","param":null,"prefetchHints":0,"slots":{"children":{"name":"slug","param":{"type":"d","key":"reparacion-monitores","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"2Xv2Nus6SKlaLuYb_xfHl"}
