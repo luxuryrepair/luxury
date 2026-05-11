@@ -29,4 +29,7 @@ INSERT INTO public.settings (key, value, description) VALUES
   ('about_mission',       'Proporcionar un servicio técnico de confianza que permita a nuestros clientes <strong>reparar sus televisores de forma económica</strong>.', 'Texto de Misión'),
   ('about_vision',        'Convertirnos en el <strong>servicio técnico de referencia en Getafe y el sur de Madrid</strong>.', 'Texto de Visión'),
   ('about_values',        '[{"title":"Profesionalidad","description":"Técnicos cualificados con amplia experiencia en el sector"},{"title":"Transparencia","description":"Precios claros y presupuestos sin compromiso"},{"title":"Compromiso","description":"Dedicación absoluta a la satisfacción del cliente"},{"title":"Rapidez","description":"Reparaciones eficientes en 24-48 horas"}]', 'Valores del negocio (JSON array con title y description)')
-ON CONFLICT (key) DO NOTHING;
+ON CONFLICT (key) DO UPDATE
+SET value = EXCLUDED.value,
+    description = EXCLUDED.description,
+    updated_at = NOW();
