@@ -5,6 +5,17 @@
 -- Ejecuta este script en Supabase SQL Editor
 -- =====================================================
 
+-- Habilitar RLS y permitir lectura pública solo de las claves about_*
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Permitir lectura pública de settings about" ON public.settings;
+
+CREATE POLICY "Permitir lectura pública de settings about"
+    ON public.settings
+    FOR SELECT
+    TO anon, authenticated
+    USING (key LIKE 'about_%');
+
 INSERT INTO public.settings (key, value, description) VALUES
   ('about_hero_title',    'Sobre Nosotros',                                                     'Título del hero en página Nosotros'),
   ('about_hero_subtitle', 'Tu servicio técnico de confianza en Getafe',                         'Subtítulo del hero en página Nosotros'),
