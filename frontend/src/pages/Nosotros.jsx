@@ -187,7 +187,7 @@ export default function Nosotros() {
         <div className="container">
           <motion.div className="location-content" {...fadeInUp}>
             <MapPin size={40} />
-            <h2 className="section-title">Servicio Local en Getafe</h2>
+            <h2 className="section-title">Servicio Comunidad de Madrid</h2>
             <p className="location-text" dangerouslySetInnerHTML={{ __html: about.about_location_text }} />
           </motion.div>
         </div>
