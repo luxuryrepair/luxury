@@ -3,10 +3,10 @@ self.__BUILD_MANIFEST = {
     "static/chunks/06s9cgj3fn0hi.js"
   ],
   "/Home": [
-    "static/chunks/16rge78jgi.m6.js"
+    "static/chunks/06xar1o7o7lnw.js"
   ],
   "/Nosotros": [
-    "static/chunks/0-u8ciwuwtd27.js"
+    "static/chunks/04bdyfdnuqs20.js"
   ],
   "/PrivacyPolicy": [
     "static/chunks/0l.6uhdj72x3u.js"
