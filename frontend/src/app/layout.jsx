@@ -25,7 +25,6 @@ export const metadata = {
   },
   description:
     'Servicio técnico premium en reparación de televisores en Madrid. Diagnóstico gratuito y garantía en todas nuestras reparaciones.',
-  metadataBase: new URL('https://telerayo.com'),
   icons: {
     icon: 'https://opcdigtqxrmksmemnugs.supabase.co/storage/v1/object/public/images/icono.ico',
   },

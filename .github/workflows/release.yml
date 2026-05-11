@@ -34,45 +34,9 @@ jobs:
           echo "version_number=${VERSION#v}" >> $GITHUB_OUTPUT
           echo "Versión: $VERSION"
 
-      # 3. Configurar Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+      # 3. Generar changelog automático
 
-      # 4. Instalar dependencias
-      - name: Instalar dependencias
-        working-directory: ./frontend
-        run: npm ci
-
-      # 5. Build Next.js (static export → out/)
-      - name: Build proyecto
-        working-directory: ./frontend
-        run: npm run build
-        env:
-          NEXT_PUBLIC_BASE_PATH:                   ${{ secrets.NEXT_PUBLIC_BASE_PATH }}
-          # Supabase — obligatorios
-          NEXT_PUBLIC_SUPABASE_URL:                  ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY:             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # EmailJS — opcionales
-          NEXT_PUBLIC_EMAILJS_SERVICE_ID:            ${{ secrets.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}
-          NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID:  ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID }}
-          NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID:    ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID }}
-          NEXT_PUBLIC_EMAILJS_PUBLIC_KEY:            ${{ secrets.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY }}
-          # Google Maps embed — opcional
-          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:           ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
-
-      # 6. Crear ZIP del build (carpeta out/)
-      - name: Crear archivo de distribución
-        run: |
-          cd frontend/out
-          zip -r ../../luxury-repair-${{ steps.get_version.outputs.version }}.zip .
-          cd ../..
-          echo "ZIP creado: luxury-repair-${{ steps.get_version.outputs.version }}.zip"
-
-      # 7. Generar changelog automático
+      # 3. Generar changelog
       - name: Generar changelog
         id: changelog
         run: |
@@ -97,7 +61,7 @@ jobs:
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
-      # 8. Crear Release en GitHub
+      # 4. Crear Release en GitHub
       - name: Crear GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -106,9 +70,6 @@ jobs:
           body: |
             # Luxury Repair — ${{ steps.get_version.outputs.version }}
 
-            ## Descargas
-            - **luxury-repair-${{ steps.get_version.outputs.version }}.zip** — Build estático del frontend (Next.js export)
-
             ## Notas de la versión
 
             ${{ steps.changelog.outputs.changelog }}
@@ -116,10 +77,11 @@ jobs:
             ---
 
             ## Deploy
-            El frontend se despliega automáticamente en GitHub Pages via `deploy.yml`.
+            Frontend y Backend desplegados automáticamente en **Vercel** via `deploy.yml`.
 
             ## Tecnologías
-            - Next.js 16 + React 19 (static export)
+            - Next.js 16 + React 19 (SSR en Vercel)
+            - Flask + Python (Vercel Serverless)
             - Supabase (servicios, reviews, social links, settings)
             - EmailJS (formulario de contacto)
             - Framer Motion + Lucide React
@@ -132,22 +94,25 @@ jobs:
             - `add_business_info_to_settings.sql` — Info del negocio
             - `create_groq_usage_table.sql` — Registro de uso de IA
 
-            ## Variables de entorno necesarias
+            ## Variables de entorno necesarias (Frontend)
             - `NEXT_PUBLIC_SUPABASE_URL`
             - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
+            ## Variables de entorno necesarias (Backend)
+            - `SUPABASE_URL`, `SUPABASE_KEY`, `SUPABASE_SERVICE_KEY`
+            - `SECRET_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`
+            - `ALLOWED_ORIGINS`
+
             ---
             *Generado automáticamente por GitHub Actions*
-          files: |
-            luxury-repair-${{ steps.get_version.outputs.version }}.zip
-            changelog.md
+          files: changelog.md
           draft: false
           prerelease: false
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 9. Notificación de éxito
+      # 5. Notificación de éxito
       - name: Notificación de éxito
         run: |
           echo "Release ${{ steps.get_version.outputs.version }} creado exitosamente."

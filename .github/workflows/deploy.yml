@@ -1,108 +1,75 @@
-name: Deploy to GitHub Pages
+name: Deploy to Vercel
 
-# Ejecutar en push a main o manualmente
 on:
   push:
     branches:
       - main
   workflow_dispatch:
 
-# Permisos necesarios para escribir en gh-pages
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  deploy:
+  # ── Frontend (Next.js) ─────────────────────────────────────────────────────
+  deploy-frontend:
+    name: Deploy Frontend
     runs-on: ubuntu-22.04
-
     steps:
-      # 1. Checkout del código
       - name: Checkout código
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # 2. Configurar Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
 
-      # 3. Instalar dependencias
-      - name: Instalar dependencias
+      - name: Pull configuración de Vercel (Frontend)
         working-directory: ./frontend
-        run: npm ci
-
-      # 4. Validar secrets obligatorios
-      - name: Validar secrets configurados
-        run: |
-          echo "Validando secrets obligatorios..."
-          MISSING=()
-
-          [ -z "$SUPABASE_URL" ]       && MISSING+=("NEXT_PUBLIC_SUPABASE_URL")
-          [ -z "$SUPABASE_ANON_KEY" ]  && MISSING+=("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-
-          if [ ${#MISSING[@]} -gt 0 ]; then
-            echo "ERROR: faltan secrets obligatorios:"
-            for s in "${MISSING[@]}"; do echo "  - $s"; done
-            exit 1
-          fi
-
-          echo "Secrets obligatorios OK."
-
-          # Avisos opcionales
-          if [ -z "$EMAILJS_SERVICE_ID" ]; then
-            echo "AVISO: NEXT_PUBLIC_EMAILJS_SERVICE_ID no configurado"
-          fi
-          if [ -z "$EMAILJS_TEMPLATE_BUSINESS_ID" ]; then
-            echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID no configurado"
-          fi
-          if [ -z "$EMAILJS_TEMPLATE_CLIENT_ID" ]; then
-            echo "AVISO: NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID no configurado"
-          fi
-          if [ -z "$EMAILJS_PUBLIC_KEY" ]; then
-            echo "AVISO: NEXT_PUBLIC_EMAILJS_PUBLIC_KEY no configurado"
-          fi
-          if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
-            echo "AVISO: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY no configurado"
-          fi
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          SUPABASE_URL:                  ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_ANON_KEY:             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          EMAILJS_SERVICE_ID:            ${{ secrets.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}
-          EMAILJS_TEMPLATE_BUSINESS_ID:  ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID }}
-          EMAILJS_TEMPLATE_CLIENT_ID:    ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID }}
-          EMAILJS_PUBLIC_KEY:            ${{ secrets.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY }}
-          GOOGLE_MAPS_API_KEY:           ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
 
-      # 5. Build Next.js (static export → carpeta out/)
-      - name: Build proyecto
+      - name: Build Frontend en Vercel
         working-directory: ./frontend
-        run: npm run build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          # Base path para GitHub Pages (repo project site)
-          NEXT_PUBLIC_BASE_PATH:                  ${{ secrets.NEXT_PUBLIC_BASE_PATH }}
-          # Supabase — obligatorios (la info del negocio viene de la DB, no de secrets)
-          NEXT_PUBLIC_SUPABASE_URL:                  ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY:             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # EmailJS — opcionales
-          NEXT_PUBLIC_EMAILJS_SERVICE_ID:            ${{ secrets.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}
-          NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID:  ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_BUSINESS_ID }}
-          NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID:    ${{ secrets.NEXT_PUBLIC_EMAILJS_TEMPLATE_CLIENT_ID }}
-          NEXT_PUBLIC_EMAILJS_PUBLIC_KEY:            ${{ secrets.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY }}
-          # Google Maps embed — opcional
-          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:           ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
 
-      # 6. Deploy a GitHub Pages (rama gh-pages)
-      - name: Deploy a gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/out
-          publish_branch: gh-pages
-          # cname: telerayo.com  # Descomentar si tienes dominio personalizado
-          commit_message: 'chore: deploy from ${{ github.ref_name }} - ${{ github.sha }}'
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+      - name: Deploy Frontend a producción
+        working-directory: ./frontend
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
+
+  # ── Backend (Flask/Python) ─────────────────────────────────────────────────
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull configuración de Vercel (Backend)
+        working-directory: ./backend
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+
+      - name: Build Backend en Vercel
+        working-directory: ./backend
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+
+      - name: Deploy Backend a producción
+        working-directory: ./backend
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}

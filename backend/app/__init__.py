@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from flask_cors import CORS
 from app.config import Config
 from app.auth import init_login_manager
+import os
 
 # Inicializar extensiones
 login_manager = LoginManager()
@@ -16,8 +17,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
-    # Inicializar extensiones
-    CORS(app)
+    # Inicializar extensiones — CORS restringido al frontend en Vercel
+    allowed_origins = os.getenv('ALLOWED_ORIGINS', '*')
+    origins = [o.strip() for o in allowed_origins.split(',')] if allowed_origins != '*' else '*'
+    CORS(app, origins=origins, supports_credentials=True)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     init_login_manager(login_manager)
