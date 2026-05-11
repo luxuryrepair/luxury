@@ -18,7 +18,7 @@ export default function Hero() {
           transition={{ duration: 0.6 }}
         >
           <h1 className="hero-title">
-            Reparación de <span className="highlight">Televisores</span> en Getafe
+            Reparación de <span className="highlight">Televisores</span> en Madrid
           </h1>
           <p className="hero-subtitle">
             Servicio técnico premium con más de 20 años de experiencia.

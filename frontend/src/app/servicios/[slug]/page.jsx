@@ -26,12 +26,12 @@ export async function generateMetadata({ params }) {
   if (!service) {
     return {
       title: 'Servicio',
-      description: 'Servicio técnico especializado en reparación de televisores en Getafe.',
+      description: 'Servicio técnico especializado en reparación de televisores en Madrid.',
     }
   }
   return {
     title: service.title,
-    description: service.description || `${service.title} - Servicio técnico especializado en Getafe.`,
+    description: service.description || `${service.title} - Servicio técnico especializado en Madrid.`,
   }
 }
 

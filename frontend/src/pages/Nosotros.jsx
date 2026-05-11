@@ -13,8 +13,8 @@ import { getAboutContent } from '@/lib/supabase'
 // ─── Datos por defecto (fallback si la DB aún no tiene contenido) ───────────
 const DEFAULTS = {
   about_hero_title: 'Sobre Nosotros',
-  about_hero_subtitle: 'Tu servicio técnico de confianza en Getafe',
-  about_intro_text1: 'Somos un servicio técnico especializado en la <strong>reparación de televisores en Getafe (Madrid)</strong>, con una sólida trayectoria ofreciendo soluciones eficaces para todo tipo de averías.',
+  about_hero_subtitle: 'Tu servicio técnico de confianza en Madrid',
+  about_intro_text1: 'Somos un servicio técnico especializado en la <strong>reparación de televisores en Madrid</strong>, con una sólida trayectoria ofreciendo soluciones eficaces para todo tipo de averías.',
   about_intro_text2: 'Nuestro equipo técnico cuenta con amplia experiencia en la reparación de televisores de todas las tecnologías: <strong>LED, OLED, LCD, Plasma y Smart TV</strong>.',
   about_services: [
     'Reparación de televisores LED, OLED, LCD y Plasma',
@@ -34,9 +34,9 @@ const DEFAULTS = {
     'Uso de repuestos originales o de alta calidad',
     'Alta tasa de éxito en reparaciones',
   ],
-  about_location_text: 'Ofrecemos cobertura en <strong>Getafe y municipios cercanos</strong>.',
+  about_location_text: 'Ofrecemos cobertura en <strong>Madrid y municipios cercanos</strong>.',
   about_mission: 'Proporcionar un servicio técnico de confianza que permita a nuestros clientes <strong>reparar sus televisores de forma económica</strong>.',
-  about_vision: 'Convertirnos en el <strong>servicio técnico de referencia en Getafe y el sur de Madrid</strong>.',
+  about_vision: 'Convertirnos en el <strong>servicio técnico de referencia en Madrid y el sur de la Comunidad</strong>.',
   about_values: [
     { title: 'Profesionalidad', description: 'Técnicos cualificados con amplia experiencia en el sector' },
     { title: 'Transparencia', description: 'Precios claros y presupuestos sin compromiso' },
@@ -187,7 +187,7 @@ export default function Nosotros() {
         <div className="container">
           <motion.div className="location-content" {...fadeInUp}>
             <MapPin size={40} />
-            <h2 className="section-title">Servicio Comunidad de Madrid</h2>
+            <h2 className="section-title">Servicio Local en Madrid</h2>
             <p className="location-text" dangerouslySetInnerHTML={{ __html: about.about_location_text }} />
           </motion.div>
         </div>
