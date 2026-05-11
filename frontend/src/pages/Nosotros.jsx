@@ -7,9 +7,63 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import useAnalytics from '@/hooks/useAnalytics'
+import { useState, useEffect } from 'react'
+import { getAboutContent } from '@/lib/supabase'
+
+// ─── Datos por defecto (fallback si la DB aún no tiene contenido) ───────────
+const DEFAULTS = {
+  about_hero_title: 'Sobre Nosotros',
+  about_hero_subtitle: 'Tu servicio técnico de confianza en Getafe',
+  about_intro_text1: 'Somos un servicio técnico especializado en la <strong>reparación de televisores en Getafe (Madrid)</strong>, con una sólida trayectoria ofreciendo soluciones eficaces para todo tipo de averías.',
+  about_intro_text2: 'Nuestro equipo técnico cuenta con amplia experiencia en la reparación de televisores de todas las tecnologías: <strong>LED, OLED, LCD, Plasma y Smart TV</strong>.',
+  about_services: [
+    'Reparación de televisores LED, OLED, LCD y Plasma',
+    'Servicio técnico especializado en Smart TV',
+    'Reparación de averías de imagen, sonido y placa base',
+    'Diagnóstico profesional con presupuesto sin compromiso',
+    'Servicio urgente',
+    'Reparación de televisores de todas las marcas',
+  ],
+  about_brands: ['Samsung', 'LG', 'Sony', 'Philips', 'Panasonic', 'Xiaomi'],
+  about_brands_description: 'Trabajamos con televisores de fabricantes reconocidos.',
+  about_reasons: [
+    'Atención personalizada y cercana',
+    'Técnicos cualificados y con experiencia',
+    'Precios competitivos y transparentes',
+    'Reparaciones rápidas y garantizadas',
+    'Uso de repuestos originales o de alta calidad',
+    'Alta tasa de éxito en reparaciones',
+  ],
+  about_location_text: 'Ofrecemos cobertura en <strong>Getafe y municipios cercanos</strong>.',
+  about_mission: 'Proporcionar un servicio técnico de confianza que permita a nuestros clientes <strong>reparar sus televisores de forma económica</strong>.',
+  about_vision: 'Convertirnos en el <strong>servicio técnico de referencia en Getafe y el sur de Madrid</strong>.',
+  about_values: [
+    { title: 'Profesionalidad', description: 'Técnicos cualificados con amplia experiencia en el sector' },
+    { title: 'Transparencia', description: 'Precios claros y presupuestos sin compromiso' },
+    { title: 'Compromiso', description: 'Dedicación absoluta a la satisfacción del cliente' },
+    { title: 'Rapidez', description: 'Reparaciones eficientes en 24-48 horas' },
+  ],
+}
+
+const VALUE_ICONS = [
+  <Award className="value-icon" key="award" />,
+  <Shield className="value-icon" key="shield" />,
+  <Heart className="value-icon" key="heart" />,
+  <Clock className="value-icon" key="clock" />,
+]
 
 export default function Nosotros() {
   const { trackClick } = useAnalytics()
+
+  const [about, setAbout] = useState(DEFAULTS)
+
+  useEffect(() => {
+    getAboutContent().then((data) => {
+      if (data && Object.keys(data).length > 0) {
+        setAbout({ ...DEFAULTS, ...data })
+      }
+    })
+  }, [])
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -18,32 +72,10 @@ export default function Nosotros() {
     transition: { duration: 0.6 }
   }
 
-  const values = [
-    { icon: <Award className="value-icon" />, title: 'Profesionalidad', description: 'Técnicos cualificados con amplia experiencia en el sector' },
-    { icon: <Shield className="value-icon" />, title: 'Transparencia', description: 'Precios claros y presupuestos sin compromiso' },
-    { icon: <Heart className="value-icon" />, title: 'Compromiso', description: 'Dedicación absoluta a la satisfacción del cliente' },
-    { icon: <Clock className="value-icon" />, title: 'Rapidez', description: 'Reparaciones eficientes en 24-48 horas' },
-  ]
-
-  const services = [
-    'Reparación de televisores LED, OLED, LCD y Plasma',
-    'Servicio técnico especializado en Smart TV',
-    'Reparación de averías de imagen, sonido y placa base',
-    'Diagnóstico profesional con presupuesto sin compromiso',
-    'Servicio urgente',
-    'Reparación de televisores de todas las marcas'
-  ]
-
-  const brands = ['Samsung', 'LG', 'Sony', 'Philips', 'Panasonic', 'Xiaomi']
-
-  const reasons = [
-    'Atención personalizada y cercana',
-    'Técnicos cualificados y con experiencia',
-    'Precios competitivos y transparentes',
-    'Reparaciones rápidas y garantizadas',
-    'Uso de repuestos originales o de alta calidad',
-    'Alta tasa de éxito en reparaciones'
-  ]
+  const services = Array.isArray(about.about_services) ? about.about_services : DEFAULTS.about_services
+  const brands   = Array.isArray(about.about_brands)   ? about.about_brands   : DEFAULTS.about_brands
+  const reasons  = Array.isArray(about.about_reasons)  ? about.about_reasons  : DEFAULTS.about_reasons
+  const values   = Array.isArray(about.about_values)   ? about.about_values   : DEFAULTS.about_values
 
   return (
     <div className="nosotros-page">
@@ -55,7 +87,7 @@ export default function Nosotros() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            Sobre Nosotros
+            {about.about_hero_title}
           </motion.h1>
           <motion.p
             className="nosotros-hero-subtitle"
@@ -63,7 +95,7 @@ export default function Nosotros() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Tu servicio técnico de confianza en Getafe
+            {about.about_hero_subtitle}
           </motion.p>
         </div>
       </section>
@@ -73,15 +105,8 @@ export default function Nosotros() {
           <motion.div className="intro-content" {...fadeInUp}>
             <div className="intro-icon"><Users size={48} /></div>
             <h2 className="section-title">¿Quiénes Somos?</h2>
-            <p className="intro-text">
-              Somos un servicio técnico especializado en la <strong>reparación de televisores
-              en Getafe (Madrid)</strong>, con una sólida trayectoria ofreciendo soluciones
-              eficaces para todo tipo de averías.
-            </p>
-            <p className="intro-text">
-              Nuestro equipo técnico cuenta con amplia experiencia en la reparación de televisores
-              de todas las tecnologías: <strong>LED, OLED, LCD, Plasma y Smart TV</strong>.
-            </p>
+            <p className="intro-text" dangerouslySetInnerHTML={{ __html: about.about_intro_text1 }} />
+            <p className="intro-text" dangerouslySetInnerHTML={{ __html: about.about_intro_text2 }} />
           </motion.div>
         </div>
       </section>
@@ -116,9 +141,7 @@ export default function Nosotros() {
         <div className="container">
           <motion.div {...fadeInUp}>
             <h2 className="section-title">Especialistas en Todas las Marcas</h2>
-            <p className="brands-description">
-              Trabajamos con televisores de fabricantes reconocidos.
-            </p>
+            <p className="brands-description">{about.about_brands_description}</p>
             <div className="brands-list">
               {brands.map((brand, index) => (
                 <motion.div
@@ -165,9 +188,7 @@ export default function Nosotros() {
           <motion.div className="location-content" {...fadeInUp}>
             <MapPin size={40} />
             <h2 className="section-title">Servicio Local en Getafe</h2>
-            <p className="location-text">
-              Ofrecemos cobertura en <strong>Getafe y municipios cercanos</strong>.
-            </p>
+            <p className="location-text" dangerouslySetInnerHTML={{ __html: about.about_location_text }} />
           </motion.div>
         </div>
       </section>
@@ -178,19 +199,13 @@ export default function Nosotros() {
             <motion.div className="mvv-card" {...fadeInUp}>
               <Target size={48} />
               <h3>Nuestra Misión</h3>
-              <p>
-                Proporcionar un servicio técnico de confianza que permita a nuestros
-                clientes <strong>reparar sus televisores de forma económica</strong>.
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: about.about_mission }} />
             </motion.div>
 
             <motion.div className="mvv-card" {...fadeInUp} transition={{ delay: 0.2 }}>
               <Eye size={48} />
               <h3>Visión</h3>
-              <p>
-                Convertirnos en el <strong>servicio técnico de referencia en Getafe
-                y el sur de Madrid</strong>.
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: about.about_vision }} />
             </motion.div>
 
             <motion.div className="mvv-card values-card" {...fadeInUp} transition={{ delay: 0.4 }}>
@@ -199,7 +214,7 @@ export default function Nosotros() {
               <div className="values-list">
                 {values.map((value, index) => (
                   <div key={index} className="value-item">
-                    {value.icon}
+                    {VALUE_ICONS[index % VALUE_ICONS.length]}
                     <div>
                       <h4>{value.title}</h4>
                       <p>{value.description}</p>

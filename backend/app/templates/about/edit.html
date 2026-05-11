@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Nosotros - Contenido{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0"><i class="bi bi-people me-2"></i>Contenido de "Nosotros"</h1>
+    {% if ai_enabled %}
+    <button class="btn btn-primary" id="btn-generate-ai">
+        <i class="bi bi-magic me-2"></i>Generar con IA
+    </button>
+    {% else %}
+    <a href="{{ url_for('settings.edit') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-key me-2"></i>Configura la API Key de Groq para usar IA
+    </a>
+    {% endif %}
+</div>
+
+<!-- Alerta de estado -->
+<div id="ai-alert" class="alert d-none mb-4" role="alert"></div>
+
+<form method="POST" action="{{ url_for('about.save') }}">
+
+    <!-- HERO -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-image me-2"></i>Sección Hero</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Título</label>
+                <input type="text" name="about_hero_title" class="form-control"
+                       value="{{ content.get('about_hero_title', 'Sobre Nosotros') }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Subtítulo</label>
+                <input type="text" name="about_hero_subtitle" class="form-control"
+                       value="{{ content.get('about_hero_subtitle', '') }}">
+            </div>
+        </div>
+    </div>
+
+    <!-- QUIÉNES SOMOS -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-chat-quote me-2"></i>¿Quiénes Somos?</div>
+        <div class="card-body row g-3">
+            <div class="col-12">
+                <label class="form-label">Primer párrafo <small class="text-muted">(permite HTML: &lt;strong&gt;, &lt;em&gt;)</small></label>
+                <textarea name="about_intro_text1" class="form-control" rows="3">{{ content.get('about_intro_text1', '') }}</textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Segundo párrafo</label>
+                <textarea name="about_intro_text2" class="form-control" rows="3">{{ content.get('about_intro_text2', '') }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- SERVICIOS -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-tools me-2"></i>Servicios de Reparación</div>
+        <div class="card-body">
+            <label class="form-label">Un servicio por línea</label>
+            <textarea name="about_services" class="form-control font-monospace" rows="8">{% if content.get('about_services') %}{% for s in content['about_services'] %}{{ s }}
+{% endfor %}{% endif %}</textarea>
+        </div>
+    </div>
+
+    <!-- MARCAS -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-award me-2"></i>Marcas</div>
+        <div class="card-body row g-3">
+            <div class="col-12">
+                <label class="form-label">Descripción de la sección marcas</label>
+                <input type="text" name="about_brands_description" class="form-control"
+                       value="{{ content.get('about_brands_description', '') }}">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Marcas — una por línea</label>
+                <textarea name="about_brands" class="form-control font-monospace" rows="4">{% if content.get('about_brands') %}{% for b in content['about_brands'] %}{{ b }}
+{% endfor %}{% endif %}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- RAZONES -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-check2-circle me-2"></i>¿Por qué Elegirnos?</div>
+        <div class="card-body">
+            <label class="form-label">Una razón por línea</label>
+            <textarea name="about_reasons" class="form-control font-monospace" rows="7">{% if content.get('about_reasons') %}{% for r in content['about_reasons'] %}{{ r }}
+{% endfor %}{% endif %}</textarea>
+        </div>
+    </div>
+
+    <!-- LOCALIZACIÓN + MVV -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-geo-alt me-2"></i>Localización y Misión / Visión</div>
+        <div class="card-body row g-3">
+            <div class="col-12">
+                <label class="form-label">Texto de localización <small class="text-muted">(permite HTML)</small></label>
+                <input type="text" name="about_location_text" class="form-control"
+                       value="{{ content.get('about_location_text', '') }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Misión <small class="text-muted">(permite HTML)</small></label>
+                <textarea name="about_mission" class="form-control" rows="3">{{ content.get('about_mission', '') }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Visión <small class="text-muted">(permite HTML)</small></label>
+                <textarea name="about_vision" class="form-control" rows="3">{{ content.get('about_vision', '') }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- VALORES -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-heart me-2"></i>Valores</div>
+        <div class="card-body">
+            <label class="form-label">Un valor por línea en formato <code>Título | Descripción</code></label>
+            <textarea name="about_values" class="form-control font-monospace" rows="6">{% if content.get('about_values') %}{% for v in content['about_values'] %}{{ v.title }} | {{ v.description }}
+{% endfor %}{% endif %}</textarea>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-5">
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="bi bi-save me-2"></i>Guardar Cambios
+        </button>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary btn-lg">Cancelar</a>
+    </div>
+</form>
+
+<script>
+document.getElementById('btn-generate-ai')?.addEventListener('click', async function () {
+    const btn = this;
+    const alertEl = document.getElementById('ai-alert');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando…';
+    alertEl.className = 'alert alert-info mb-4';
+    alertEl.textContent = '⏳ La IA está generando el contenido, por favor espera…';
+
+    try {
+        const res = await fetch('{{ url_for("about.generate_ai") }}', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            alertEl.className = 'alert alert-success mb-4';
+            alertEl.textContent = data.message + ' Recargando…';
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            alertEl.className = 'alert alert-danger mb-4';
+            alertEl.textContent = '❌ ' + (data.error || 'Error desconocido');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic me-2"></i>Generar con IA';
+        }
+    } catch (e) {
+        alertEl.className = 'alert alert-danger mb-4';
+        alertEl.textContent = '❌ Error de conexión: ' + e.message;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-magic me-2"></i>Generar con IA';
+    }
+});
+</script>
+{% endblock %}

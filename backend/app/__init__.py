@@ -33,6 +33,7 @@ def create_app():
     from app.routes.social_links import social_links_bp
     from app.routes.images import images_bp
     from app.routes.settings import settings_bp
+    from app.routes.about import about_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='/')
@@ -41,5 +42,6 @@ def create_app():
     app.register_blueprint(social_links_bp, url_prefix='/social-links')
     app.register_blueprint(images_bp, url_prefix='/images')
     app.register_blueprint(settings_bp, url_prefix='/settings')
+    app.register_blueprint(about_bp, url_prefix='/about')
     
     return app

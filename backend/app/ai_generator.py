@@ -173,6 +173,102 @@ NO agregues explicaciones adicionales, SOLO el JSON."""
             raise
     
     @classmethod
+    def generate_about_content(cls, business_name: str = None) -> dict:
+        """
+        Genera todo el contenido de la página Nosotros usando IA.
+
+        Returns:
+            dict con claves: hero_title, hero_subtitle, intro_text1, intro_text2,
+                             services (list), brands (list), reasons (list),
+                             location_text, mission, vision,
+                             values (list of {title, description})
+        """
+        import json, re
+
+        model = None
+        try:
+            client = cls.get_groq_client()
+            model = SupabaseClient.get_setting('groq_model', 'llama-3.3-70b-versatile')
+
+            if not business_name:
+                business_name = SupabaseClient.get_setting('business_name', 'Luxury Repair')
+
+            prompt = f"""Eres un redactor experto en negocios de reparación de televisores.
+
+Genera el contenido completo en español para la página "Sobre Nosotros" del negocio "{business_name}",
+un servicio técnico especializado en reparación de televisores en Getafe (Madrid).
+
+Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
+{{
+  "hero_title": "Título corto del hero (máx 40 chars)",
+  "hero_subtitle": "Subtítulo del hero (máx 80 chars)",
+  "intro_text1": "Primer párrafo de ¿Quiénes Somos? en HTML (puede incluir <strong>). Mínimo 80 palabras.",
+  "intro_text2": "Segundo párrafo de ¿Quiénes Somos? en HTML. Mínimo 60 palabras.",
+  "services": ["servicio 1", "servicio 2", "servicio 3", "servicio 4", "servicio 5", "servicio 6"],
+  "brands": ["Marca1", "Marca2", "Marca3", "Marca4", "Marca5", "Marca6"],
+  "brands_description": "Frase corta sobre las marcas con las que trabajamos (máx 100 chars)",
+  "reasons": ["razón 1", "razón 2", "razón 3", "razón 4", "razón 5", "razón 6"],
+  "location_text": "Texto corto sobre la cobertura geográfica en HTML (máx 120 chars)",
+  "mission": "Texto de misión en HTML con <strong>. Mínimo 30 palabras.",
+  "vision": "Texto de visión en HTML con <strong>. Mínimo 30 palabras.",
+  "values": [
+    {{"title": "Valor 1", "description": "Descripción breve del valor 1"}},
+    {{"title": "Valor 2", "description": "Descripción breve del valor 2"}},
+    {{"title": "Valor 3", "description": "Descripción breve del valor 3"}},
+    {{"title": "Valor 4", "description": "Descripción breve del valor 4"}}
+  ]
+}}
+
+NO agregues texto adicional fuera del JSON. Sé original, profesional y orientado al cliente."""
+
+            logger.info(f"Generando contenido About para: {business_name}")
+
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "Eres un asistente que genera contenido en JSON para páginas web. Respondes ÚNICAMENTE con JSON válido."},
+                    {"role": "user", "content": prompt}
+                ],
+                model=model,
+                temperature=0.7,
+                max_tokens=3000,
+                stream=False
+            )
+
+            response_text = chat_completion.choices[0].message.content.strip()
+
+            # Limpiar markdown si lo hay
+            if response_text.startswith("```"):
+                response_text = re.sub(r'^```(?:json)?', '', response_text).rstrip('`').strip()
+
+            try:
+                content = json.loads(response_text, strict=False)
+            except json.JSONDecodeError:
+                json_match = re.search(r'\{[\s\S]*\}', response_text)
+                if json_match:
+                    content = json.loads(json_match.group(0), strict=False)
+                else:
+                    raise
+
+            # Registrar uso
+            usage = getattr(chat_completion, 'usage', None)
+            cls._register_usage(
+                model=model,
+                title=f"about/{business_name}",
+                success=True,
+                prompt_tokens=getattr(usage, 'prompt_tokens', 0) or 0,
+                completion_tokens=getattr(usage, 'completion_tokens', 0) or 0,
+                total_tokens=getattr(usage, 'total_tokens', 0) or 0
+            )
+
+            logger.info("Contenido About generado exitosamente")
+            return content
+
+        except Exception as e:
+            logger.error(f"Error al generar contenido About: {str(e)}")
+            cls._register_usage(model=model, title="about", success=False, error_message=str(e))
+            raise
+
+    @classmethod
     def is_enabled(cls) -> bool:
         """Verifica si la generación con IA está habilitada"""
         enabled = SupabaseClient.get_setting('ai_generation_enabled', 'true')

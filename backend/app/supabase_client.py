@@ -546,3 +546,52 @@ class SupabaseClient:
         except Exception as e:
             logger.error(f"Error al obtener uso reciente de IA: {str(e)}")
             return []
+
+    # ========== CONTENIDO PÁGINA NOSOTROS ==========
+
+    ABOUT_KEYS = [
+        'about_hero_title', 'about_hero_subtitle',
+        'about_intro_text1', 'about_intro_text2',
+        'about_services', 'about_brands', 'about_brands_description',
+        'about_reasons', 'about_location_text',
+        'about_mission', 'about_vision', 'about_values',
+    ]
+
+    @classmethod
+    def get_about_content(cls):
+        """
+        Obtiene todo el contenido de la página Nosotros desde settings.
+        Los campos JSON (services, brands, reasons, values) se deserializan.
+        """
+        import json
+        try:
+            client = cls.get_client()
+            response = client.table('settings').select('key, value').like('key', 'about_%').execute()
+            raw = {item['key']: item['value'] for item in response.data}
+
+            # Deserializar JSON arrays
+            for k in ('about_services', 'about_brands', 'about_reasons', 'about_values'):
+                if raw.get(k):
+                    try:
+                        raw[k] = json.loads(raw[k])
+                    except Exception:
+                        pass
+
+            return raw
+        except Exception as e:
+            logger.error(f"Error al obtener contenido About: {str(e)}")
+            return {}
+
+    @classmethod
+    def save_about_content(cls, data: dict):
+        """
+        Guarda todos los campos about_* desde un dict.
+        Los valores list/dict se serializan a JSON automáticamente.
+        """
+        import json
+        for key, value in data.items():
+            if not key.startswith('about_'):
+                continue
+            if isinstance(value, (list, dict)):
+                value = json.dumps(value, ensure_ascii=False)
+            cls.set_setting(key, value)

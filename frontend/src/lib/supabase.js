@@ -231,3 +231,42 @@ export async function getBusinessSettings() {
     return null
   }
 }
+
+/**
+ * Obtener contenido dinámico de la página Nosotros desde settings (about_*)
+ */
+export async function getAboutContent() {
+  if (!supabase) {
+    console.warn('Cliente de Supabase no inicializado')
+    return null
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('key, value')
+      .like('key', 'about_%')
+
+    if (error) {
+      console.error('Error al obtener contenido about:', error)
+      return null
+    }
+
+    const raw = data.reduce((acc, row) => {
+      acc[row.key] = row.value
+      return acc
+    }, {})
+
+    // Deserializar campos JSON
+    for (const k of ['about_services', 'about_brands', 'about_reasons', 'about_values']) {
+      if (raw[k]) {
+        try { raw[k] = JSON.parse(raw[k]) } catch {}
+      }
+    }
+
+    return raw
+  } catch (err) {
+    console.error('Error de red al obtener contenido about:', err)
+    return null
+  }
+}

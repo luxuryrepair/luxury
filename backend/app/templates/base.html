@@ -104,6 +104,11 @@
                             <i class="bi bi-building"></i> Empresa
                         </a>
                     </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link {% if 'about' in request.endpoint %}active{% endif %}" href="{{ url_for('about.edit') }}">
+                                <i class="bi bi-people"></i> Nosotros
+                            </a>
+                        </li>
                 </ul>
                 
                 <hr class="bg-white mt-4">
