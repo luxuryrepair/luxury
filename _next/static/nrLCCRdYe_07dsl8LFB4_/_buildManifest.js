@@ -1,27 +1,27 @@
 self.__BUILD_MANIFEST = {
   "/Contacto": [
-    "static/chunks/06s9cgj3fn0hi.js"
+    "static/chunks/0ntb13zt5.f9p.js"
   ],
   "/Home": [
-    "static/chunks/06xar1o7o7lnw.js"
+    "static/chunks/0ktfr_ck8gbon.js"
   ],
   "/Nosotros": [
-    "static/chunks/04bdyfdnuqs20.js"
+    "static/chunks/14nv84np-5241.js"
   ],
   "/PrivacyPolicy": [
-    "static/chunks/0l.6uhdj72x3u.js"
+    "static/chunks/07cpacapwv1oj.js"
   ],
   "/ServicioDetalle": [
-    "static/chunks/022tvz217jg3..js"
+    "static/chunks/0vu~ex.q~azsp.js"
   ],
   "/Servicios": [
-    "static/chunks/01nx58cg1e0hi.js"
+    "static/chunks/00-iwiphxh8tq.js"
   ],
   "/TermsOfService": [
-    "static/chunks/0u934u5hegx3~.js"
+    "static/chunks/0__bbs1-sgw2g.js"
   ],
   "/_error": [
-    "static/chunks/0.7dgm1au928e.js"
+    "static/chunks/0wt~.0wa9tzs8.js"
   ],
   "__rewrites": {
     "afterFiles": [],
