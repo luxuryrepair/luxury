@@ -45,6 +45,77 @@ Bienvenido al repositorio de Luxury Repair, plataforma para gestión y promoció
 - URLs canónicas y rutas amigables para SEO
 - Documentación técnica enlazada en [`doc/`](doc/)
 
+## Colores corporativos (Frontend)
+
+<p>Referencia tomada de la paleta principal definida en <a href="frontend/src/styles/index.css">frontend/src/styles/index.css</a>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Muestra</th>
+      <th>HEX</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>gold</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#d4af37;border:1px solid #999;"></span></td>
+      <td>#D4AF37</td>
+    </tr>
+    <tr>
+      <td>gold-bright</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#ffd700;border:1px solid #999;"></span></td>
+      <td>#FFD700</td>
+    </tr>
+    <tr>
+      <td>gold-mid</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#b8962e;border:1px solid #999;"></span></td>
+      <td>#B8962E</td>
+    </tr>
+    <tr>
+      <td>gold-dark</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#3a2a00;border:1px solid #999;"></span></td>
+      <td>#3A2A00</td>
+    </tr>
+    <tr>
+      <td>silver</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#cfcfcf;border:1px solid #999;"></span></td>
+      <td>#CFCFCF</td>
+    </tr>
+    <tr>
+      <td>silver-mid</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#8f8f8f;border:1px solid #999;"></span></td>
+      <td>#8F8F8F</td>
+    </tr>
+    <tr>
+      <td>bg-main</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#0b0b0b;border:1px solid #999;"></span></td>
+      <td>#0B0B0B</td>
+    </tr>
+    <tr>
+      <td>bg-soft</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#111111;border:1px solid #999;"></span></td>
+      <td>#111111</td>
+    </tr>
+    <tr>
+      <td>bg-card</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#181818;border:1px solid #999;"></span></td>
+      <td>#181818</td>
+    </tr>
+    <tr>
+      <td>text-main</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#e5e5e5;border:1px solid #999;"></span></td>
+      <td>#E5E5E5</td>
+    </tr>
+    <tr>
+      <td>text-muted</td>
+      <td><span style="display:inline-block;width:56px;height:20px;background:#8f8f8f;border:1px solid #999;"></span></td>
+      <td>#8F8F8F</td>
+    </tr>
+  </tbody>
+</table>
+
 ## Contacto y soporte
 
 Para dudas técnicas, sugerencias o incidencias, consulta la documentación en [`doc/`](doc/) o abre un issue en este repositorio.
