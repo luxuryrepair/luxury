@@ -1,9 +1,10 @@
-# Icono y logo del proyecto
+# Luxury Repair — Proyecto Web
+
 <p align="center">
   <img src="https://opcdigtqxrmksmemnugs.supabase.co/storage/v1/object/public/images/icono.ico" alt="Favicon" width="48" height="48" style="vertical-align:middle; margin-right:8px;" />
   <img src="https://opcdigtqxrmksmemnugs.supabase.co/storage/v1/object/public/images/logo.svg" alt="Logo Luxury Repair" height="48" style="vertical-align:middle;" />
 </p>
-# Tecnologías principales
+
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-000?logo=nextdotjs&logoColor=white" alt="Next.js" />
   <img src="https://img.shields.io/badge/Flask-000?logo=flask&logoColor=white" alt="Flask" />
@@ -18,7 +19,6 @@
 <p align="center">
   <a href="doc/LICENSE.md"><img src="https://img.shields.io/badge/Licencia-Uso%20Libre-green" alt="Licencia de uso libre" /></a>
 </p>
-# Luxury Repair — Proyecto Web
 
 Bienvenido al repositorio de Luxury Repair, plataforma para gestión y promoción de servicios técnicos de reparación de televisores en Madrid.
 
