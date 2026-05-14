@@ -47,15 +47,16 @@ function withBasePath(path = '') {
 
 export default function robots() {
   const { origin } = getSiteConfig()
-
+  const sitemapUrl = withBasePath('/sitemap.xml')
+  // Directiva Sitemap como primera línea, luego reglas y host
   return {
+    sitemap: sitemapUrl,
     rules: [
       {
         userAgent: '*',
         allow: '/',
       },
     ],
-    sitemap: withBasePath('/sitemap.xml'),
     host: origin,
   }
 }
