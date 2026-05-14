@@ -1,5 +1,5 @@
 User-Agent: *
 Allow: /
 
-Host: http://localhost:3000
-Sitemap: http://localhost:3000/luxury/sitemap.xml
+Host: https://luxuryrepair.github.io
+Sitemap: https://luxuryrepair.github.io/luxury/sitemap.xml
